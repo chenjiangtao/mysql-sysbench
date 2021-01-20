@@ -69,11 +69,10 @@ class QuickInsert(object):
 
 
     def insert_data(self):
-        # start_id = self.id
+        global start_id
+        print("开始于：", start_id)
         cursor = self.conn.cursor()
-        for x in range(1000):
-            global start_id
-
+        for x in range(5000):
             insert_user_sql = """
             INSERT INTO T_BALANCE_REPORT (`ID`,`ACCOUNT_ID`,`CARD_NO`,`CARD_NAME`,`CARD_STATUS`,`UPDATE_DATE`,`TRADING_DATE`,`BALANCE`,`INIT_AMOUNT`,`INIT_DATE`,`VALID_END_DATE`,`IS_REPLACE`,`OLD_CARD_NO`)
             VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s );
@@ -81,7 +80,7 @@ class QuickInsert(object):
 
             user_values, order_values = [], []
             # user_values = []
-            for i in range(200000):
+            for i in range(10000):
 
                 timestamp = self.randomTimestamp()
                 time_local = time.localtime(timestamp)
@@ -124,6 +123,8 @@ class QuickInsert(object):
             cursor.executemany(insert_user_sql, user_values)
             # cursor.executemany(insert_user_sql, order_values)
             self.conn.commit()
+            print("写入：", (x + 1) * 10000)
+
 
         cursor.close()
 
