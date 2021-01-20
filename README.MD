@@ -46,8 +46,16 @@ db = "test"
 ```
 ### 启动单线程版
 
+```shell
 python3 quick_insert.py &
+```
 
 ### 启动多线程版
 
+```shell
 python3 quick_insert_threads.py &
+```
+
+# 说明
+
+- [生成mysql亿级压测数据程序](https://blog.csdn.net/evane1890/article/details/112911724)
