@@ -5,16 +5,15 @@ import random
 import time
 from datetime import datetime
 import pymysql as mysql
-import _thread
 
 host = "127.0.0.1"
-port = 4000
+port = 3306
 username = "root"
-password = "Root@123"
+password = "123"
 charset = "utf-8"
 db = "test"
 
-
+# 数据起始点
 start_id = 1
 
 
@@ -69,10 +68,14 @@ class QuickInsert(object):
 
 
     def insert_data(self):
+        # start_id = self.id
+        cursor = self.conn.cursor()
         global start_id
         print("开始于：", start_id)
-        cursor = self.conn.cursor()
+
         for x in range(5000):
+
+            # 表，换成自己的。测试用的建表语句见 tab.sql
             insert_user_sql = """
             INSERT INTO T_BALANCE_REPORT (`ID`,`ACCOUNT_ID`,`CARD_NO`,`CARD_NAME`,`CARD_STATUS`,`UPDATE_DATE`,`TRADING_DATE`,`BALANCE`,`INIT_AMOUNT`,`INIT_DATE`,`VALID_END_DATE`,`IS_REPLACE`,`OLD_CARD_NO`)
             VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s );
@@ -89,42 +92,42 @@ class QuickInsert(object):
                 user_id = str(uuid.uuid4())
 
                 user_values.append((
-                        # NULL,
-                        # 1001358650,
-                        # '1001358650',
-                        # '压测数据',
-                        # '压测激活',
-                        # '2021-01-15 00:00:00',
-                        # '2020-01-15 00:00:00',
-                        # 100.000,
-                        # 100.000,
-                        # '20210115',
-                        # '20200115',
-                        # '0',
-                        # '1001358650'
-                     start_id,
-                     start_id,
-                     start_id,
-                     self.getCardName() + str(start_id),
-                     self.getCardStatus(),
-                     createTime,
-                     createTime,
-                     random.randint(1, 30000) / random.randint(1, 17),
-                     random.randint(100, 10000),
-                     radomDate,
-                     radomDate,
-                     self.getIsReplace(),
-                     # self.createPhone()
-                     "".join(random.choice("0123456789") for i in range(8))
-                    ))
-
+                    # --------------- 参数 --------
+                    # NULL,
+                    # 1001358650,
+                    # '1001358650',
+                    # '压测数据',
+                    # '压测激活',
+                    # '2021-01-15 00:00:00',
+                    # '2020-01-15 00:00:00',
+                    # 100.000,
+                    # 100.000,
+                    # '20210115',
+                    # '20200115',
+                    # '0',
+                    # '1001358650'
+                    # --------------- 参数 --------
+                    start_id,
+                    start_id,
+                    start_id,
+                    self.getCardName() + str(start_id),
+                    self.getCardStatus(),
+                    createTime,
+                    createTime,
+                    random.randint(1, 30000) / random.randint(1, 17),
+                    random.randint(100, 10000),
+                    radomDate,
+                    radomDate,
+                    self.getIsReplace(),
+                    # self.createPhone()
+                    "".join(random.choice("0123456789") for i in range(8))
+                ))
                 start_id = start_id + 1
 
             cursor.executemany(insert_user_sql, user_values)
-            # cursor.executemany(insert_user_sql, order_values)
+            # cursor.executemany(insert_user_sql, order_values) #可以插入多个表
             self.conn.commit()
-            print("写入：", (x + 1) * 10000)
-
+            print("写入：", (x * 10000) + start_id)
 
         cursor.close()
 
