@@ -9,9 +9,12 @@ import pymysql as mysql
 host = "127.0.0.1"
 port = 3306
 username = "root"
-password = "123456"
+password = "123"
 charset = "utf-8"
 db = "test"
+
+# 数据起始点
+start_id = 1
 
 
 class QuickInsert(object):
@@ -33,6 +36,11 @@ class QuickInsert(object):
         end = '2020-07-27 00:00:00'
         return self.strTimeProp(start, end, random.random(), frmt)
 
+    def randomDate(self, frmt='%Y-%m-%d'):
+        start = '2016-06-02'
+        end = '2020-07-27'
+        return self.strTimeProp(start, end, random.random(), frmt)
+
     def createPhone(self):
         for k in range(10):
             prelist = ["130", "131", "132", "133", "134", "135", "136", "137", "138", "139",
@@ -40,38 +48,86 @@ class QuickInsert(object):
                        "186", "187", "188", "189"]
             return random.choice(prelist) + "".join(random.choice("0123456789") for i in range(8))
 
+    def getCardName(self):
+        for k in range(10):
+            prelist = ["圣诞咖啡快乐会员星礼包红杯字母款", "大杯香草风味星冰乐电子券", "星巴克星情月饼礼盒",
+                       "大杯冷萃冰咖啡(手机银行)", "2020 年Roastery 专用咖啡乐园券", "大杯摩卡", "实用主义商品福袋",
+                       "香草风味拿铁大杯电子券", "星巴克夏日活力早餐套餐电子券", "摩卡可可碎片星冰乐"]
+            return random.choice(prelist)
+
+    def getCardStatus(self):
+        for k in range(10):
+            prelist = ["01-已使用", "04-未激活", "03-未激活", "06-激活", "10-系统作废",
+                       "0-已使用", "20-作废"]
+            return random.choice(prelist)
+
+    def getIsReplace(self):
+        for k in range(10):
+            prelist = ["Y", "N"]
+            return random.choice(prelist)
+
+
     def insert_data(self):
+        # start_id = self.id
         cursor = self.conn.cursor()
-        for x in range(50):
+        global start_id
+        print("开始于：", start_id)
+
+        for x in range(5000):
+
+            # 表，换成自己的。测试用的建表语句见 tab.sql
             insert_user_sql = """
-            insert into `T_BALANCE_REPORT` ( `id`,`user_name`,`phone`,`age`, `province`, `city`, `create_time`,`update_time` )
-                    VALUES(%s,%s,%s,%s,%s,%s,%s,%s)
+            INSERT INTO T_BALANCE_REPORT (`ID`,`ACCOUNT_ID`,`CARD_NO`,`CARD_NAME`,`CARD_STATUS`,`UPDATE_DATE`,`TRADING_DATE`,`BALANCE`,`INIT_AMOUNT`,`INIT_DATE`,`VALID_END_DATE`,`IS_REPLACE`,`OLD_CARD_NO`)
+            VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s );
                 """
-            insert_order_sql = """ insert into `order` ( `id`, `product_count`, `user_id`, `price`, `create_time`, `update_time`) 
-                               values(%s,%s,%s,%s,%s,%s)
-                               """
+
             user_values, order_values = [], []
-            for i in range(10):
+            # user_values = []
+            for i in range(10000):
+
                 timestamp = self.randomTimestamp()
                 time_local = time.localtime(timestamp)
                 createTime = time.strftime("%Y-%m-%d %H:%M:%S", time_local)
+                radomDate = time.strftime("%Y-%m-%d", time_local)
                 user_id = str(uuid.uuid4())
-                user_values.append(
-                    (user_id, "名字" + str(x) + str(i), self.createPhone(), random.randint(1, 120),
-                     str(random.randint(1, 26)),
-                     str(random.randint(1, 1000)), createTime, createTime))
 
-                random_order_count = random.randint(0, 3)
-                if random_order_count > 0:
-                    for c in range(random_order_count):
-                        timestamp = self.randomTimestamp()
-                        time_local = time.localtime(timestamp)
-                        order_create_time = time.strftime("%Y-%m-%d %H:%M:%S", time_local)
-                        order_values.append((str(uuid.uuid4()), random.randint(1, 5), user_id,
-                                             random.randint(10, 2000), order_create_time, order_create_time))
+                user_values.append((
+                    # --------------- 参数 --------
+                    # NULL,
+                    # 1001358650,
+                    # '1001358650',
+                    # '压测数据',
+                    # '压测激活',
+                    # '2021-01-15 00:00:00',
+                    # '2020-01-15 00:00:00',
+                    # 100.000,
+                    # 100.000,
+                    # '20210115',
+                    # '20200115',
+                    # '0',
+                    # '1001358650'
+                    # --------------- 参数 --------
+                    start_id,
+                    start_id,
+                    start_id,
+                    self.getCardName() + str(start_id),
+                    self.getCardStatus(),
+                    createTime,
+                    createTime,
+                    random.randint(1, 30000) / random.randint(1, 17),
+                    random.randint(100, 10000),
+                    radomDate,
+                    radomDate,
+                    self.getIsReplace(),
+                    # self.createPhone()
+                    "".join(random.choice("0123456789") for i in range(8))
+                ))
+                start_id = start_id + 1
+
             cursor.executemany(insert_user_sql, user_values)
-            cursor.executemany(insert_order_sql, order_values)
+            # cursor.executemany(insert_user_sql, order_values) #可以插入多个表
             self.conn.commit()
+            print("写入：", (x * 10000) + start_id)
 
         cursor.close()
 

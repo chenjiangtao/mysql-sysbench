@@ -6,7 +6,7 @@
 
 ### quick_insert_threads.py
 
-使用 5 个线程批量插入数据的脚本，需要引入依赖包 pymysql
+多线程批量插入数据的脚本，需要引入依赖包 pymysql
 
 ### quick_sql_insert.py
 
