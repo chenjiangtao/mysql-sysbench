@@ -120,8 +120,6 @@ class QuickInsert(object):
 
 if __name__ == "__main__":
 
-    # index = 3
-    # quickInsert.insert_data("thread-" + str(index), 1000, (index * 10000) + 1)
     #########################################
     # 写入总数为：threads * times * sql_batch #
     # offset    : 偏移量，默认是0。如果数据库有数据，可以设一个起始点（偏移量）
