@@ -32,3 +32,22 @@ sql_batch : 每次commit多少数据
 
 生成逗号分隔的 txt 文件，之后需要使用 `load data infile` 命令导入数据。
 
+
+## 使用方法
+### 配置数据源
+
+```yaml
+host = "127.0.0.1"
+port = 3306
+username = "root"
+password = "123"
+charset = "utf-8"
+db = "test"
+```
+### 启动单线程版
+
+python3 quick_insert.py &
+
+### 启动多线程版
+
+python3 quick_insert_threads.py &
