@@ -1,5 +1,7 @@
-# python3 生成压测数据说明
+# mysql sysbench
+mysql sysbench是一款压测数据生成工具
 
+## python3 生成压测数据说明
 ### quick_insert.py
 
 使用程序方式批量插入数据的脚本，需要引入依赖包 pymysql
