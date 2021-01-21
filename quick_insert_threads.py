@@ -131,6 +131,8 @@ if __name__ == "__main__":
     #   times = 2000
     #   sql_batch = 10000
     #########################################
+
+    # 下次运行的起始位置 = (threads * times * sql_batch) + offset
     offset = 1
     threads = 3
     times = 10
