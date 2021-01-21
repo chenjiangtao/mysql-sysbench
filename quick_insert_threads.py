@@ -34,8 +34,8 @@ class QuickInsert(object):
         return self.strTimeProp(start, end, random.random(), frmt)
 
     def randomDate(self, frmt='%Y-%m-%d'):
-        start = '2016-06-02'
-        end = '2020-07-27'
+        start = '2015-06-02'
+        end = '2021-01-21'
         return self.strTimeProp(start, end, random.random(), frmt)
 
     def createPhone(self):
@@ -131,7 +131,7 @@ if __name__ == "__main__":
     #   times = 2000
     #   sql_batch = 10000
     #########################################
-    offset = 0
+    offset = 1
     threads = 3
     times = 10
     sql_batch = 10000
@@ -143,7 +143,8 @@ if __name__ == "__main__":
         quickInsert = QuickInsert()
         quickInsert.conn = QuickInsert.connect()
 
-        t = Thread(target=quickInsert.insert_data, args=(times, sql_batch, start_id + 1))
+        t = Thread(target=quickInsert.insert_data, args=(times, sql_batch, start_id))
         t.start()
+        # t.join() # 同步操作
 
 
