@@ -56,6 +56,9 @@ python3 quick_insert.py &
 python3 quick_insert_threads.py &
 ```
 
+# 根据mysql数据库中的表自动生成数据
+python3 mysql-insert.py
+
 # 说明
 ***测试可以直接使用sql/tab.sql建表，也可以改成自己的表结构***
 

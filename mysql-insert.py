@@ -154,7 +154,7 @@ if __name__ == '__main__':
     #数据库用户名
     user = 'root'
     #密码
-    password = 'Root@123'
+    password = '123123'
     #数据库名称
     database = 'eapp'
     #字符集
