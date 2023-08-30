@@ -60,3 +60,4 @@ python3 quick_insert_threads.py &
 ***测试可以直接使用sql/tab.sql建表，也可以改成自己的表结构***
 
 - [生成mysql亿级压测数据程序](https://blog.csdn.net/evane1890/article/details/112911724)
+
