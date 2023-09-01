@@ -44,6 +44,8 @@ class GetMysqlTableComments():
 
     def get_tables_insert(self, database_name):
         sqlstr = ''
+        delstr=''
+        str = []
         # 查询mysql表名和注释
         self.cursor.execute(
             'select table_name,table_comment from information_schema.TABLES where TABLE_SCHEMA=%s order by table_name',
@@ -55,9 +57,20 @@ class GetMysqlTableComments():
         for tabledata in return_tables:
             return_columns = self.get_columns_insert(tabledata[0])
             sqlstr = sqlstr +'\n-- '+tabledata[1]+'\n'
-            sqlstr = sqlstr + 'insert into ' +  tabledata[0] + '(' + return_columns +'\n'
+            if(return_columns !=''):
+                sqlstr = sqlstr + 'insert into ' +  tabledata[0] + '(' + return_columns +'\n'
 
-        return sqlstr
+
+                cols = return_columns.split(',')
+                for co in cols:
+                    if (co.count('time`')==1):
+                        # print(co)
+                        delstr = delstr + 'delete from ' + tabledata[0] + " where substring("+ co[co.find('`') + 1: co.rfind('`')]+",1,4) in ('2015','2016','2017','2018');\n"
+                        break
+
+        str.append(sqlstr)
+        str.append(delstr)
+        return str
 
 
 
@@ -67,11 +80,19 @@ class GetMysqlTableComments():
         return_columns = self.cursor.fetchall()
         columnstr = ''
 
+        # 检查列表中是否存在以'a'开头的元素
+        if any(columndata[1].count('time')==1 for columndata in return_columns):
+            ()
+        else:
+            print("表中没有时间字段,无法清除数据，跳过此表：+++++++++++++++++++++++++++" + table_name)
+            return ''
+
         coltype = []
+
         for columndata in return_columns:
             # TODO: 跳过所有自增id字段,唯一索引UNI，联合索引 MUL
             if ((columndata[0] == 'id' and columndata[2] == 'auto_increment') or columndata[3] =='UNI' or columndata[3] =='MUL' ):
-                print(columndata[0])
+                print(table_name+"有唯一约束，但非自增字段："+columndata[0])
                 continue
 
             #列名加上`是为了防止列名使用了mysql关键字时会报sql语法错误
@@ -98,8 +119,8 @@ class GetMysqlTableComments():
                 print("col type error!-------------"+ table_name+","+ ctype)
                 # break;
 
-        # 循环写入文件
-        rows=100000
+        # TODO: 循环生成文件-----------
+        rows=100
         outFile = open('outfile/'+table_name+'_insert_'+ str(rows) +'.sql', 'w+')
         for k in range(0, rows):
             valstr = ''
@@ -113,6 +134,7 @@ class GetMysqlTableComments():
                     if(i.count('(')==1):
                         randomlength = int(i[i.index('(') + 1: i.index(')')])
                         valstr = valstr + "'" + random_str(randomlength > 50 and 50 or randomlength) + "'" + ", "
+                # time
                 elif(i[:1]=='2'):
                     valstr = valstr + "'" + random_time().strftime("%Y-%m-%d %H:%M:%S") + "'" + ", "
                 # text
@@ -148,15 +170,15 @@ class GetMysqlTableComments():
 
 if __name__ == '__main__':
     #数据库地址
-    host = '127.0.0.1'
+    host = ''
     #数据库端口
     port=3306
     #数据库用户名
-    user = 'root'
+    user = 'eapp'
     #密码
-    password = '123123'
+    password = ''
     #数据库名称
-    database = 'eapp'
+    database = ''
     #字符集
     charset = 'utf8'
     my_database = GetMysqlTableComments(host, user, password, database,port,charset)
@@ -166,8 +188,13 @@ if __name__ == '__main__':
     sqlstr_insert = my_database.get_tables_insert(database)
     my_database.closedb()
     #生成的sql打印到控制台
-    print(sqlstr_insert)
+    # print(sqlstr_insert)
     #生成的sql保存到文件
     file_path='get_mysql.sql'
     with open(file_path,'w') as file:
-        file.write(sqlstr_insert)
+        file.write(sqlstr_insert[0])
+
+    #生成删除sql脚本,保存到文件
+    file_path='del_data.sql'
+    with open(file_path,'w') as file:
+        file.write(sqlstr_insert[1])

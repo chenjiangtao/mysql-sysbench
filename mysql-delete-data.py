@@ -1,12 +1,12 @@
 import pymysql
 
 if __name__ == '__main__':
-    # 打开数据库连接
-    db = pymysql.connect(host='localhost',
-                         user='root',
-                         password='123',
+    # 打开数据库连接 172.25.125.12 -ueapp -pZTRnsmHHZgq4Ra3m -D eapp_community
+    db = pymysql.connect(host='',
+                         user='',
+                         password='',
                          charset="utf8mb4",
-                         database='eapp')
+                         database='')
     # 使用 cursor() 方法创建一个游标对象 cursor
     cursor = db.cursor()
     # 打开 SQL 文件并执行

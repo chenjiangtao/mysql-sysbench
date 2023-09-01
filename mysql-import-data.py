@@ -1,27 +1,47 @@
 import os
+import pymysql
 
 if __name__ == '__main__':
 
+    db = pymysql.connect(host='',
+                         user='',
+                         password='',
+                         charset="utf8mb4",
+                         database='')
+    # 使用 cursor() 方法创建一个游标对象 cursor
+    cursor = db.cursor()
+
     # 数据源目录
-    path = 'outfile/community-1000'
+    path = 'outfile/'
 
     sqlstr_del ='';
     for dirpath, dirnames, filenames in os.walk(path):
         for file in filenames:
             ofile = os.path.join(dirpath, file)
-            print(ofile)
+            # print(ofile)
             if(file[-4:]=='.sql'):
                 print(ofile)
-                os.system('mysql -hlocalhost -uroot -p123 -D eapp < ' + ofile)
+                # load 方式
+                # os.system('mysql -h172.25.125.12 -ueapp -pZTRnsmHHZgq4Ra3m -D eapp_community < ' + ofile)
 
-                # 生成del脚本
-                tab=file[:file.rfind('_')]
-                tab=tab[:tab.rfind('_')]
-                sqlstr_del = sqlstr_del + 'delete from ' + tab + " where substring(created_time,1,4) in ('2015','2016','2017','2018');\n"
+                # 打开 SQL 文件并执行
+                with open(ofile, 'r') as f:
+                    line = f.readline()
+                    while line:
+                        # print(line)
+                        try:
+                            cursor.execute(line)
+                        except Exception as e:
+                            print(line)
+                            print("异常数据:",e)
+                        line = f.readline()
 
-    # 写文件
-    with open('del_data.sql','w') as file:
-        file.write(sqlstr_del)
+                f.close()
+
+    # 提交更改
+    db.commit()
+    # 关闭数据库连接
+    db.close()
 
 
 
