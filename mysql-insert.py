@@ -1,4 +1,4 @@
-import pymysql;
+import pymysql
 import random
 import string
 from datetime import datetime
@@ -80,19 +80,37 @@ class GetMysqlTableComments():
         return_columns = self.cursor.fetchall()
         columnstr = ''
 
-        # 检查列表中是否存在以'a'开头的元素
-        if any(columndata[1].count('time')==1 for columndata in return_columns):
+        # 检查列表中是否存在包含'time'的字段，判断是否有create\update time常规字段
+        if any(columndata[1].lower().count('time')==1 for columndata in return_columns):
             ()
         else:
-            print("表中没有时间字段,无法清除数据，跳过此表：+++++++++++++++++++++++++++" + table_name)
-            return ''
+            print(table_name+"  表中没有包含'time'的时间字段,无法清除数据，造数据时跳过此表" )
+            # return ''
+
+        if any(columndata[0].lower() == 'id' for columndata in return_columns):
+            ()
+        else:
+            print(table_name+"  表中没有id字段")
+            # return ''
+
+
 
         coltype = []
-
         for columndata in return_columns:
-            # TODO: 跳过所有自增id字段,唯一索引UNI，联合索引 MUL
-            if ((columndata[0] == 'id' and columndata[2] == 'auto_increment') or columndata[3] =='UNI' or columndata[3] =='MUL' ):
-                print(table_name+"有唯一约束，但非自增字段："+columndata[0])
+            # TODO: 跳过所有自增id字段,唯一索引UNI，联合索引 MUL,主键PRI
+            set_null = False
+
+            # column_name,COLUMN_TYPE,EXTRA,COLUMN_KEY
+            if (columndata[3].upper() in ('PRI','UNI' ,'MUL' )):
+                # print(table_name+"有唯一约束："+columndata[0])
+                set_null =True
+            if (columndata[3] == 'PRI' and (columndata[2].lower() != 'auto_increment' or columndata[0].lower() != 'id')):
+                print(table_name+"  表有PRI主键字段，但非自增： "+columndata[0]+"   "+columndata[2]+"   "+columndata[1])
+                set_null=True
+            if (columndata[1] in( 'timestamp','float','double')):
+                print(table_name+"  表有包含监控字段： "+columndata[0]+"   "+columndata[2]+"   "+columndata[1])
+
+            if set_null == True:
                 continue
 
             #列名加上`是为了防止列名使用了mysql关键字时会报sql语法错误
@@ -116,7 +134,7 @@ class GetMysqlTableComments():
             elif (ctype[:4] == 'char'):
                 coltype.append('6'+ctype)
             else:
-                print("col type error!-------------"+ table_name+","+ ctype)
+                print(table_name+"  表中字段    " +columndata[0] +" 处理未定义   "+ ctype)
                 # break;
 
         # TODO: 循环生成文件-----------
@@ -169,32 +187,45 @@ class GetMysqlTableComments():
 
 
 if __name__ == '__main__':
-    #数据库地址
-    host = ''
-    #数据库端口
-    port=3306
-    #数据库用户名
-    user = 'eapp'
-    #密码
-    password = ''
-    #数据库名称
-    database = ''
-    #字符集
-    charset = 'utf8'
-    my_database = GetMysqlTableComments(host, user, password, database,port,charset)
-    # 生成select语句
-    # sqlstr = my_database.get_tables(database)
-    # 生成insert语句
-    sqlstr_insert = my_database.get_tables_insert(database)
-    my_database.closedb()
-    #生成的sql打印到控制台
-    # print(sqlstr_insert)
-    #生成的sql保存到文件
-    file_path='get_mysql.sql'
-    with open(file_path,'w') as file:
-        file.write(sqlstr_insert[0])
 
-    #生成删除sql脚本,保存到文件
-    file_path='del_data.sql'
-    with open(file_path,'w') as file:
-        file.write(sqlstr_insert[1])
+
+
+    # # 数据库地址 Eapp
+    # host = '172.25.125.12'
+    # port=3306
+    # user = 'eapp'
+    # password = 'ZTRnsmHHZgq4Ra3m'
+    # database = 'eapp_community'
+
+    #
+    #数据库地址 俄罗斯TSP
+    host = '172.25.116.188'
+    port=3306
+    user = 'international_tsp'
+    password = 'L3o19ZSwHC8t0LCw'
+    database = 'chery_international_tsp_russia'
+    #
+    dbs = ['chery_int_tsp_rus_app','chery_int_tsp_rus_hu','chery_int_tsp_rus_manage','chery_international_tsp_russia']
+    # dbs=['eapp_community','eapp_config','eapp_market','eapp_notify','eapp_pay','eapp_shop','eapp_sys','eapp_user','xxl_job']
+
+    for database in dbs:
+        print(database+"库")
+        #字符集
+        charset = 'utf8'
+        my_database = GetMysqlTableComments(host, user, password, database,port,charset)
+        # 生成select语句
+        # sqlstr = my_database.get_tables(database)
+        # 生成insert语句
+        sqlstr_insert = my_database.get_tables_insert(database)
+        my_database.closedb()
+        #生成的sql打印到控制台
+        # print(sqlstr_insert)
+        #生成的sql保存到文件
+        file_path='get_mysql.sql'
+        with open(file_path,'w') as file:
+            file.write(sqlstr_insert[0])
+
+        #生成删除sql脚本,保存到文件
+        file_path='del_data.sql'
+        with open(file_path,'w') as file:
+            file.write(sqlstr_insert[1])
